@@ -1,0 +1,242 @@
+CREATE DATABASE Breakdown;
+USE Breakdown;
+SELECT * FROM Breakdown;
+
+CREATE TABLE Member
+	(
+    MemberID INT PRIMARY KEY AUTO_INCREMENT,
+    MemberFName VARCHAR(20),
+    MemberLName VARCHAR(20),
+    MemberLoc VARCHAR(20)
+    );
+SELECT * FROM Member;
+
+CREATE TABLE Vehicle
+	(
+    VehicleReg INT PRIMARY KEY AUTO_INCREMENT,
+    VehicleMake VARCHAR(10),
+    VehicleModel VARCHAR(10),
+    MemberId VARCHAR(10) -- Foreign Key
+    );
+SELECT * FROM Vehicle;
+
+CREATE TABLE Engineer
+	(
+    EngineerID INT PRIMARY KEY AUTO_INCREMENT,
+    EngineerFName VARCHAR(20),
+    EngineerLName VARCHAR(20)
+    );
+SELECT * FROM Engineer;
+
+CREATE  TABLE Breakdown
+	(
+    BreakdownID INT PRIMARY KEY AUTO_INCREMENT,
+    VehicleReg VARCHAR(10), -- Foreign Key
+    EngineerID INT, -- Foreign key
+    BreakdownDATE DATE,
+    BreakdownTIME TIME,
+    BreakdownLoc VARCHAR(20)
+    );
+SELECT * FROM Breakdown;
+-- Set Foreign Keys using alter commands
+ALTER TABLE Breakdown ADD FOREIGN KEY (VehicleReg) REFERENCES Vehicle(VehicleReg);
+ALTER TABLE Breakdown ADD FOREIGN KEY (EngineerID) REFERENCES Engineer(EngineerID);
+-- MUST BE SAME DATA TYPE AS FOREIGN KEY
+ALTER TABLE Breakdown MODIFY COLUMN vehicleReg INT;
+ALTER TABLE Engineer MODIFY COLUMN EngineerID INT;
+
+-- Insert Your data into the table -------------------------------------------------------
+INSERT INTO Member (MemberID, MemberFName, MemberLName, MemberLoc)
+VALUES
+    (001, 'John', 'Doe', 'Seattle'),
+    (002, 'Jane', 'Smith', 'Redmond'),
+    (003, 'Alice', 'Johnson', 'Bellevue'),
+    (004, 'Bob', 'Brown', 'Kirkland'),
+    (005, 'Eva', 'Lee', 'Renton');
+
+INSERT INTO Vehicle (VehicleReg, VehicleMake, VehicleModel, MemberID)
+VALUES
+    (001, 'Toyota', 'Camry', 001),
+    (002, 'Honda', 'Civic', 002),
+    (003, 'Ford', 'Focus', 003),
+    (004, 'Chevrolet', 'Malibu', 004),
+    (005, 'Nissan', 'Altima', 005),
+    (006, 'Tesla', 'Model 3', 001),
+    (007, 'BMW', 'X5', 002),
+    (008, 'Audi', 'A4', 003);
+
+INSERT INTO Engineer (EngineerID, EngineerFName, EngineerLName)
+VALUES
+    (101, 'David', 'Smith'),
+    (102, 'Emily', 'Clark'),
+    (103, 'Michael', 'Wang');
+
+
+INSERT INTO Breakdown (BreakdownID, VehicleReg, EngineerID, BreakdownDATE, BreakdownTIME, BreakdownLoc)
+VALUES
+    (1001, 001, 101, '2024-06-15', '10:30:00', 'Seattle'),
+    (1002, 002, 102, '2024-06-15', '14:45:00', 'Redmond'),
+    (1003, 003, 103, '2024-06-20', '09:15:00', 'Bellevue'),
+    -- Two breakdowns on the same day
+    (1004, 004, 101, '2024-06-25', '11:00:00', 'Kirkland'),
+    (1005, 005, 102, '2024-06-25', '13:30:00', 'Renton'),
+    -- Three breakdowns in the same month
+    (1006, 006, 103, '2024-06-10', '16:20:00', 'Seattle'),
+    (1007, 007, 101, '2024-06-12', '08:00:00', 'Redmond'),
+    (1008, 008, 102, '2024-06-18', '12:10:00', 'Bellevue'),
+    (1009, 001, 103, '2024-06-22', '15:40:00', 'Kirkland'),
+    (1010, 002, 101, '2024-06-28', '17:55:00', 'Renton'),
+    -- At least three vehicles with multiple breakdowns
+    (1011, 003, 102, '2024-06-15', '10:00:00', 'Bellevue'),
+    (1012, 001, 103, '2024-06-25', '14:00:00', 'Seattle');
+-- Task 3: Perform Queries ----------------------------------------------------------------------------
+-- Retrieve the names of members who live in a specific location, e.g., London.
+SELECT  MemberFName,MemberLName AS 'Full name' FROM member WHERE MemberLoc='Seattle';
+-- Retrieve all cars of a specific make, e.g., all Nissan cars.
+SELECT * FROM Vehicle WHERE VehicleMake= 'Chevrolet';
+-- Count the number of engineers that work for the company.
+SELECT COUNT(*) AS 'Number of engineers' FROM Engineer;
+-- Count the number of members registered with the company.
+SELECT COUNT(*) AS 'Number of members registered' FROM member;
+-- Retrieve all breakdowns after a particular date.
+SELECT * FROM breakdown WHERE DATE(breakdownDate) BETWEEN 20240615 AND 20240622;
+-- Retrieve all breakdowns between two dates.
+SELECT * FROM breakdown WHERE DATE(breakdownDate) LIMIT 2;
+-- Count the number of times a particular vehicle has broken down.
+SELECT COUNT(*) AS 'Number of breakdowns of particular vehicle' FROM breakdown WHERE VehicleReg=001;
+-- Count the number of vehicles that have broken down more than once.
+SELECT COUNT(VehicleReg) AS 'Number of breakdowns more than once' FROM breakdown;
+
+-- Task 4: Perform Advanced Queries-----------------------------------------------------
+
+-- Retrieve all vehicles owned by a specific member, e.g., Matt.
+SELECT vehicleReg FROM breakdown WHERE Engineerid=101;
+-- Retrieve the number of vehicles each member has, sorted by the number of vehicles from highest to lowest.
+SELECT engineerId, vehicleReg, COUNT(vehicleReg) AS 'num_of_vehicle'
+FROM breakdown
+GROUP BY engineerId, vehicleReg
+ORDER BY num_of_vehicle DESC;
+-- Retrieve all vehicles that have broken down in a specific location along with member details.
+SELECT * FROM breakdown WHERE BreakdownLoc='Seattle';
+-- Retrieve a list of all breakdowns along with member and engineer details between two dates.
+SELECT * FROM breakdown WHERE DATE(breakdownDate) BETWEEN 20240615 AND 20240622;
+-- Create three additional meaningful relational queries for the company.
+-- Break down times for a specific time
+SELECT * FROM breakdown WHERE TIME(BreakdownTIME) BETWEEN 100000 AND 120000;
+-- How many vehicles broke down in kirkland
+SELECT COUNT(BreakdownLoc) FROM breakdown WHERE BreakdownLoc='Kirkland';
+-- Where is all the breakdown location for engineerid 101
+SELECT breakdownLoc FROM breakdown WHERE engineerid=101;
+
+
+-- Task 5: Research SQL Functions ------------------------------------
+-- Research the following SQL functions: AVG, MAX, MIN, and SUM.
+-- Explain with examples how each is used. 
+-- Create a separate database with sample data to illustrate your examples. 
+-- Do not copy from websites.
+
+CREATE DATABASE TASK5;
+USE TASK5;
+CREATE TABLE Math
+	(
+    EngineerID INT PRIMARY KEY AUTO_INCREMENT,
+    EngineerFName VARCHAR(20),
+    EngineerLName VARCHAR(20)
+    );
+INSERT INTO Math (EngineerID, EngineerFName, EngineerLName)
+VALUES
+    (101, 'David', 'Smith'),
+    (102, 'Emily', 'Clark'),
+    (103, 'Michael', 'Wang'),
+    (105, 'tOM', 'OST');
+SELECT * FROM Math;
+-- AVG() is used to get the average number in a column
+SELECT AVG(EngineerID) FROM Math;
+-- MAX() Selects the max value in a column
+SELECT MAX(Engineerid) FROM Math;
+-- MIN() SELECTS the minmum value in a table
+SELECT MIN(engineerid) FROM Math;
+-- SUM() Selects the total amount in a column
+SELECT SUM(Engineerid) FROM Math;
+
+
+-- -------------------------------------------------- --------- ------------------------
+-- Task 6: Update and Delete Records
+-- Update 3 records in the Engineer table.
+-- Delete a record from the Member table.
+SELECT * FROM engineer;
+UPDATE engineer SET EngineerFName='Joshua' WHERE engineerid=101;
+UPDATE engineer SET EngineerLName ='bones' WHERE engineerid=102;
+UPDATE engineer SET EngineerLName ='Trust',EngineerFName='Lucifer' WHERE engineerid=103;
+
+USE BREAKDOWN;
+SELECT * FROM Member;
+INSERT INTO `breakdown`.`Member` (`MemberID`, `MemberFName`, `MemberLName`, `MemberLoc`) VALUES ('6', 'joey', 'ash', 'Seattle');
+DELETE FROM member WHERE MemberFName='joey';
+
+-- Extra Tasks (All Of Them Require JOIN)
+-- Note: Use EmployeeManagement Database
+USE employeemanagement;
+SELECT * FROM  Employees;
+-- Retrieve all employees who are assigned to a department with a department manager. Include their first name, last name, department name, and manager's first name and last name.
+SELECT first_name, last_name, department_name,role FROM Employees INNER JOIN Departments ON Employees.department_id=Departments.department_manager_id;
+-- Retrieve all employees who have worked on projects that started after '2023-01-01'. Include their first name, last name, project name, and project start date.
+SELECT first_name,last_name,project_name,start_date FROM employees INNER JOIN project WHERE project.start_date > '2023-01-01';
+-- Retrieve all departments that have more than 3 employees. Include the department name and the number of employees in each department.
+SELECT departments.department_name, COUNT(*) AS 'employees_number'
+FROM departments
+LEFT JOIN employees ON employees.department_id
+GROUP BY departments.department_name;
+
+
+-- Retrieve all employees who earn more than the average salary of employees in their department. Include their first name, last name, role, salary, and department name.
+SELECT employees.first_name, employees.last_name, employees.role, employees.salary, departments.department_name
+FROM employees
+JOIN departments ON employees.department_id = departments.department_id
+WHERE employees.salary > (SELECT AVG(salary) FROM employees WHERE department_id = employees.department_id);
+
+
+-- Retrieve all employees who have not been assigned to any project. Include their first name, last name, and department name.
+SELECT employees.first_name, employees.last_name, departments.department_name
+FROM employees
+LEFT JOIN project ON employees.employee_id
+LEFT JOIN departments ON employees.department_id = departments.department_id
+WHERE project.project_id IS NULL;
+
+SELECT * FROM  Employees;
+SELECT * FROM  project;
+
+-- Retrieve all projects where the total work hours logged is more than 100. Include the project name and the total work hours.
+SELECT Project.Project_ID, Project.Project_Name, SUM(works_on.work_hours) AS TotalWorkHours
+FROM project 
+JOIN works_on ON Project.Project_ID = works_on.Project_ID
+GROUP BY Project.Project_ID, Project.Project_Name
+HAVING SUM(works_on.work_hours) > 100;
+
+
+-- Retrieve all employees who work in departments managed by a female manager. Include their first name, last name, department name, and manager's first name and last name.
+SELECT E.First_Name, E.Last_Name, D.Department_Name, M.First_Name AS ManagerFirstName, M.Last_Name AS ManagerLastName,E.gender,E.role
+FROM Employees AS E
+JOIN Departments AS D ON E.Department_ID = D.Department_ID
+JOIN Employees AS M ON D.department_Manager_ID = M.Employee_ID
+WHERE M.Gender = 'Female';
+
+-- Retrieve all projects where the number of employees assigned is less than 3. Include the project name and the number of employees assigned to each project.
+SELECT P.Project_Name, COUNT(A.Employee_ID) AS NumberOfEmployees
+FROM Project AS P
+LEFT JOIN works_on AS A ON P.Project_ID = A.Project_ID
+GROUP BY P.Project_Name
+HAVING NumberOfEmployees < 3;
+
+
+-- Retrieve all employees who are assigned to projects managed by a manager whose salary is more than 80000. Include their first name, last name, project name, and manager's first name and last name.
+SELECT E.First_Name, E.Last_Name, P.Project_Name, M.First_Name AS ManagerFirstName, M.Last_Name AS ManagerLastName,E.Salary
+FROM Employees AS E
+JOIN works_on AS A ON E.Employee_ID = A.Employee_ID
+JOIN Project AS P ON A.Project_ID = P.Project_ID
+JOIN Employees AS M ON P.project_id = M.Employee_ID
+WHERE M.Salary > 80000;
+
+SELECT first_name,last_name,Salary,role='manager' FROM  Employees;
+
+
